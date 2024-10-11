@@ -19,7 +19,6 @@ global.author = "WhatsApp Bot"
 
 global.anticall = false
 global.welcome = false // check config.json
-global.mode = false // false for private, true for public 
 
 // if you have a image url input//
 
