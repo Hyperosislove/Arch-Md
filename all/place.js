@@ -3,6 +3,7 @@ require("./global")
 const store = makeInMemoryStore({ logger: pino().child({ level: 'silent', stream: 'store' }) })
 const delay = ms => (ms) && new Promise(resolve => setTimeout(resolve, ms))
 const makeid = crypto.randomBytes(3).toString('hex')
+
 const getBuffer = async (url, options) => {
 try {
 options ? options : {}
@@ -57,24 +58,6 @@ Skyzo.inspectLink = async (code) => {
         return extractGroupInviteMetadata(results);
 }
 
-Skyzo.sendTextWithMentions = async (jid, text, quoted, options = {}) => Skyzo.sendMessage(jid, { text: text, mentions: [...text.matchAll(/@(\d{0,16})/g)].map(v => v[1] + '@s.whatsapp.net'), ...options }, { quoted })
-
- Skyzo.downloadAndSaveMediaMessage = async (message, filename, attachExtension = true) => {
-let quoted = message.msg ? message.msg : message
-let mime = (message.msg || message).mimetype || ''
-let messageType = message.mtype ? message.mtype.replace(/Message/gi, '') : mime.split('/')[0]
-const stream = await downloadContentFromMessage(quoted, messageType)
-let buffer = Buffer.from([])
-for await(const chunk of stream) {
-buffer = Buffer.concat([buffer, chunk])
-}
-let type = await FileType.fromBuffer(buffer)
-trueFileName = attachExtension ? (filename + '.' + type.ext) : filename
-await fs.writeFileSync(trueFileName, buffer)
-return trueFileName
- }
- 
-    
 function updateNameToDb(contacts) {
         if (!contacts) return
         for (let contact of contacts) {
@@ -93,29 +76,6 @@ function updateNameToDb(contacts) {
         Skyzo.contacts[id] = chat
         }
 }
-
-
-Skyzo.sendContact = async (jid, kon, desk = "Developer Bot", quoted = '', opts = {}) => {
-let list = []
-for (let i of kon) {
-list.push({
-displayName: botname,
-  vcard: 'BEGIN:VCARD\n' +
-    'VERSION:3.0\n' +
-    `N:;${botname};;;\n` +
-    `FN:${botname}\n` +
-    'ORG:null\n' +
-    'TITLE:\n' +
-    `item1.TEL;waid=${i}:${i}\n` +
-    'item1.X-ABLabel:Ponsel\n' +
-    `X-WA-BIZ-DESCRIPTION:${desk}\n` +
-    `X-WA-BIZ-NAME:${botname}\n` +
-    'END:VCARD'
-})
-}
-Skyzo.sendMessage(jid, { contacts: { displayName: `${list.length} Kontak`, contacts: list }, ...opts }, { quoted })
-}
-
 
 Skyzo.ev.on('contacts.upsert', updateNameToDb)
 Skyzo.ev.on('groups.update', updateNameToDb)
@@ -193,6 +153,26 @@ Skyzo.sendMedia = async (jid, path, quoted, options = {}) => {
         return await Skyzo.sendMessage(jid, { [`${pase}`]: data, mimetype: mime, ...options }, { quoted })
 }
 
+Skyzo.sendContact = async (jid, kon, desk = "Developer Bot", quoted = '', opts = {}) => {
+let list = []
+for (let i of kon) {
+list.push({
+displayName: namaowner,
+  vcard: 'BEGIN:VCARD\n' +
+    'VERSION:3.0\n' +
+    `N:;${namaowner};;;\n` +
+    `FN:${namaowner}\n` +
+    'ORG:null\n' +
+    'TITLE:\n' +
+    `item1.TEL;waid=${i}:${i}\n` +
+    'item1.X-ABLabel:Ponsel\n' +
+    `X-WA-BIZ-DESCRIPTION:${desk}\n` +
+    `X-WA-BIZ-NAME:${namaowner}\n` +
+    'END:VCARD'
+})
+}
+Skyzo.sendMessage(jid, { contacts: { displayName: `${list.length} Kontak`, contacts: list }, ...opts }, { quoted })
+}
 
 Skyzo.setStatus = async (status) => {
         return await Skyzo.query({
